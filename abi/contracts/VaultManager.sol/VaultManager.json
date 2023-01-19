@@ -1,0 +1,705 @@
+[
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "ASSET",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "BASE_VAULT",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "AUCTION_CONTRACT",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "PEPEFI_ADMIN",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "VAULT_MANAGER",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "ORACLE_CONTRACT",
+            "type": "address"
+          }
+        ],
+        "internalType": "struct VaultLib.Contracts",
+        "name": "_CONTRACTS",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [],
+    "name": "CONTRACTS",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "ASSET",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "BASE_VAULT",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "AUCTION_CONTRACT",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "PEPEFI_ADMIN",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "VAULT_MANAGER",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "ORACLE_CONTRACT",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "LIQUIDITY_OWNERS",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "NEXT_VAULT",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "ROLLOVER_DONE",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "VAULT_ASSETS",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "VAULT_SUPPLY",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "WHITELISTED_COLLECTIONS",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "WITHDRAW_QUEUE",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "shares",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_vault",
+        "type": "address"
+      }
+    ],
+    "name": "addLiquidity",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "string",
+            "name": "VAULT_NAME",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "VAULT_DESCRIPTION",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "EXPIRY_IN",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "EXTERNAL_LP_ENABLED",
+            "type": "bool"
+          },
+          {
+            "internalType": "address",
+            "name": "PREVIOUS_VAULT",
+            "type": "address"
+          },
+          {
+            "internalType": "address[]",
+            "name": "WHITELISTED_NFT_LPS",
+            "type": "address[]"
+          }
+        ],
+        "internalType": "struct VaultLib.creationParams",
+        "name": "_params",
+        "type": "tuple"
+      },
+      {
+        "internalType": "address[]",
+        "name": "_WHITELISTED_COLLECTIONS",
+        "type": "address[]"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "COLLECTION",
+            "type": "address"
+          },
+          {
+            "internalType": "enum VaultLib.COLLECTION_TYPE",
+            "name": "TYPE",
+            "type": "uint8"
+          },
+          {
+            "internalType": "address",
+            "name": "VAULUATION_PERFORMER",
+            "type": "address"
+          },
+          {
+            "internalType": "uint32",
+            "name": "MAX_LTV",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "MAX_DURATION",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "APR",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "slope",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "MAX_LOAN",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string[]",
+            "name": "ALLOWED_TRAITS",
+            "type": "string[]"
+          },
+          {
+            "internalType": "uint32[]",
+            "name": "TRAIT_MULTIPLIER",
+            "type": "uint32[]"
+          }
+        ],
+        "internalType": "struct VaultLib.SUPPORTED_COLLECTIONS[]",
+        "name": "_supported_collections",
+        "type": "tuple[]"
+      }
+    ],
+    "name": "createVault",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "vault",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getVaults",
+    "outputs": [
+      {
+        "internalType": "address[]",
+        "name": "",
+        "type": "address[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_vault",
+        "type": "address"
+      }
+    ],
+    "name": "getWhitelistedDetails",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "COLLECTION",
+            "type": "address"
+          },
+          {
+            "internalType": "enum VaultLib.COLLECTION_TYPE",
+            "name": "TYPE",
+            "type": "uint8"
+          },
+          {
+            "internalType": "address",
+            "name": "VAULUATION_PERFORMER",
+            "type": "address"
+          },
+          {
+            "internalType": "uint32",
+            "name": "MAX_LTV",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "MAX_DURATION",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "APR",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "slope",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "MAX_LOAN",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string[]",
+            "name": "ALLOWED_TRAITS",
+            "type": "string[]"
+          },
+          {
+            "internalType": "uint32[]",
+            "name": "TRAIT_MULTIPLIER",
+            "type": "uint32[]"
+          }
+        ],
+        "internalType": "struct VaultLib.SUPPORTED_COLLECTIONS",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "increaseAsset",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_VAULT_ADDRESS",
+        "type": "address"
+      }
+    ],
+    "name": "isValidVault",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_CURRENT_VAULT",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_PREVIOUS_VAULT",
+        "type": "address"
+      }
+    ],
+    "name": "performOldRollover",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_CURRENT_VAULT",
+        "type": "address"
+      }
+    ],
+    "name": "rolloverToNewVault",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_CURRENT_VAULT",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_NEXT_VAULT",
+        "type": "address"
+      }
+    ],
+    "name": "setRolloverVault",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address[]",
+        "name": "_WHITELISTED_COLLECTIONS",
+        "type": "address[]"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "COLLECTION",
+            "type": "address"
+          },
+          {
+            "internalType": "enum VaultLib.COLLECTION_TYPE",
+            "name": "TYPE",
+            "type": "uint8"
+          },
+          {
+            "internalType": "address",
+            "name": "VAULUATION_PERFORMER",
+            "type": "address"
+          },
+          {
+            "internalType": "uint32",
+            "name": "MAX_LTV",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "MAX_DURATION",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "APR",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "slope",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "MAX_LOAN",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string[]",
+            "name": "ALLOWED_TRAITS",
+            "type": "string[]"
+          },
+          {
+            "internalType": "uint32[]",
+            "name": "TRAIT_MULTIPLIER",
+            "type": "uint32[]"
+          }
+        ],
+        "internalType": "struct VaultLib.SUPPORTED_COLLECTIONS[]",
+        "name": "_supported_collections",
+        "type": "tuple[]"
+      }
+    ],
+    "name": "updatePlatformParams",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "COLLECTION",
+            "type": "address"
+          },
+          {
+            "internalType": "enum VaultLib.COLLECTION_TYPE",
+            "name": "TYPE",
+            "type": "uint8"
+          },
+          {
+            "internalType": "address",
+            "name": "VAULUATION_PERFORMER",
+            "type": "address"
+          },
+          {
+            "internalType": "uint32",
+            "name": "MAX_LTV",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "MAX_DURATION",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "APR",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "slope",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "MAX_LOAN",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string[]",
+            "name": "ALLOWED_TRAITS",
+            "type": "string[]"
+          },
+          {
+            "internalType": "uint32[]",
+            "name": "TRAIT_MULTIPLIER",
+            "type": "uint32[]"
+          }
+        ],
+        "internalType": "struct VaultLib.SUPPORTED_COLLECTIONS",
+        "name": "current_value",
+        "type": "tuple"
+      }
+    ],
+    "name": "validCollectionCheck",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "vaults",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "shares",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_vault",
+        "type": "address"
+      }
+    ],
+    "name": "withdrawLiquidity",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]

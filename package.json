@@ -1,0 +1,33 @@
+{
+    "name": "my-template",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "deploy:localhost": "npx hardhat run scripts/deploy.js --network localhost",
+        "deploy:goerli": "npx hardhat run scripts/deploy.js --network goerli",
+        "build:hardhat": "npx hardhat run scripts/deploy.js --network localhost",
+        "start:oracle": "npx hardhat run scripts/oracle.js --network localhost",
+        "test": "npx hardhat test --network localhost",
+        "node": "npx hardhat node",
+        "compile": "npx hardhat compile"
+    },
+    "dependencies": {
+        "@nomiclabs/hardhat-ethers": "^2.2.2",
+        "@nomiclabs/hardhat-waffle": "^2.0.3",
+        "@openzeppelin/contracts": "^4.8.0",
+        "dotenv": "^16.0.1",
+        "hardhat-contract-sizer": "^2.6.1",
+        "prb-math": "^2.4.3",
+        "solmate": "^6.6.1",
+        "axios": "^0.27.2"
+    },
+    "devDependencies": {
+        "chai": "^4.3.6",
+        "ethereum-waffle": "^3.4.4",
+        "hardhat": "^2.12.2",
+        "hardhat-abi-exporter": "^2.8.0",
+        "hardhat-contract-sizer": "^2.6.1",
+        "hardhat-gas-reporter": "^1.0.9",
+        "hardhat-interface-generator": "^0.0.6"
+    }
+}

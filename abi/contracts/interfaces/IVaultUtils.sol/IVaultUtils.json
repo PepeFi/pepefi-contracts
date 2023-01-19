@@ -1,0 +1,41 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "uint32",
+        "name": "_loanId",
+        "type": "uint32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_loanAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "_preprocessPNNFTFi",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint64",
+        "name": "",
+        "type": "uint64"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]

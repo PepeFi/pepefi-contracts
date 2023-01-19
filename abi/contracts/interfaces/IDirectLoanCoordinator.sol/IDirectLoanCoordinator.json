@@ -1,0 +1,143 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "uint32",
+        "name": "_loanId",
+        "type": "uint32"
+      }
+    ],
+    "name": "getLoanData",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "loanContract",
+            "type": "address"
+          },
+          {
+            "internalType": "uint64",
+            "name": "smartNftId",
+            "type": "uint64"
+          },
+          {
+            "internalType": "enum IDirectLoanCoordinator.StatusType",
+            "name": "status",
+            "type": "uint8"
+          }
+        ],
+        "internalType": "struct IDirectLoanCoordinator.Loan",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint32",
+        "name": "_loanId",
+        "type": "uint32"
+      },
+      {
+        "internalType": "address",
+        "name": "_loanContract",
+        "type": "address"
+      }
+    ],
+    "name": "isValidLoanId",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint32",
+        "name": "_loanId",
+        "type": "uint32"
+      },
+      {
+        "internalType": "address",
+        "name": "_borrower",
+        "type": "address"
+      }
+    ],
+    "name": "mintObligationReceipt",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "obligationReceiptToken",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "promissoryNoteToken",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_lender",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "_loanType",
+        "type": "bytes32"
+      }
+    ],
+    "name": "registerLoan",
+    "outputs": [
+      {
+        "internalType": "uint32",
+        "name": "",
+        "type": "uint32"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint32",
+        "name": "_loanId",
+        "type": "uint32"
+      }
+    ],
+    "name": "resolveLoan",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]

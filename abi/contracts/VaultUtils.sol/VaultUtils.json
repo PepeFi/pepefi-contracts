@@ -1,0 +1,83 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_NFTFI_CONTRACT",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_NFTFI_COORDINATOR",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [],
+    "name": "NFTFI_CONTRACT",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "NFTFI_COORDINATOR",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint32",
+        "name": "_loanId",
+        "type": "uint32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_loanAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "_preprocessPNNFTFi",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint64",
+        "name": "",
+        "type": "uint64"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]
