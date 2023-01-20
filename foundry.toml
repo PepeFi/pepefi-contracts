@@ -1,0 +1,19 @@
+[profile.default]
+src = 'contracts'
+out = 'out'
+libs = [
+    'lib',
+    'node_modules',
+]
+test = 'forge-tests/'
+cache_path = 'forge-cache'
+script = 'forge-script'
+remappings = [
+    'openzeppelin/=node_modules/@openzeppelin/contracts/',
+    'eth-gas-reporter/=node_modules/eth-gas-reporter/',
+    'hardhat/=node_modules/hardhat/',
+    'is-valid-signature/=node_modules/is-valid-signature/',
+    'solmate/=node_modules/solmate/src/',
+]
+
+# See more config options https://github.com/foundry-rs/foundry/tree/master/config
