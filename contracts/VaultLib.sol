@@ -1,5 +1,6 @@
-library VaultLib{
-    struct loanDetails {
+    pragma solidity ^0.8.9;
+
+    struct LoanDetails {
         uint256 timestamp; //unix timestamp of when the loan was made
 
         address collateral; //collaret nft
@@ -10,7 +11,8 @@ library VaultLib{
         uint256 repaymentAmount; //repayment amount
     }
 
-    struct loanCreation {
+    /// changed: expirty => expiry, keyboard typo
+    struct LoanCreation {
         address nftCollateralContract; 
         uint256 nftCollateralId;
         uint256 loanPrincipal; 
@@ -39,7 +41,7 @@ library VaultLib{
         uint256 EXPIRY_IN;
     }
 
-    struct creationParams{
+    struct CreationParams{
         string VAULT_NAME;
         string VAULT_DESCRIPTION; 
         uint256 EXPIRY_IN;
@@ -73,13 +75,11 @@ library VaultLib{
         uint32[] TRAIT_MULTIPLIER;
     }
 
-    struct LoanDetails {
+    /// changed: to Loan 
+    struct Loan {
         address nftCollateralContract;
         uint256 nftCollateralId; 
         uint256 loanAmount; 
         uint32 duration; 
         address vault;
     }
-
-
-}

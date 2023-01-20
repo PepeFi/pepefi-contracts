@@ -4,7 +4,12 @@ import "./interfaces/IVault.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-import {VaultLib} from './VaultLib.sol';
+import {
+    Contracts,
+    Withdrawl,
+    CreationParams,
+    SUPPORTED_COLLECTIONS
+} from './VaultLib.sol';
 
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -12,10 +17,10 @@ import "./interfaces/IVault.sol";
 
 
 contract VaultManager is ReentrancyGuard{
-    VaultLib.Contracts public CONTRACTS;
+    Contracts public CONTRACTS;
 
     address[] public WHITELISTED_COLLECTIONS;
-    mapping(address => VaultLib.SUPPORTED_COLLECTIONS) private WHITELISTED_DETAILS;
+    mapping(address => SUPPORTED_COLLECTIONS) private WHITELISTED_DETAILS;
 
     address[] public vaults;
 
@@ -23,7 +28,7 @@ contract VaultManager is ReentrancyGuard{
     mapping(address => uint256) public VAULT_SUPPLY;
     mapping(address => address) public NEXT_VAULT;
     mapping(address => bool) public ROLLOVER_DONE;
-    mapping(address => VaultLib.Withdrawl[]) public WITHDRAW_QUEUE; //Withdraw queue
+    mapping(address => Withdrawl[]) public WITHDRAW_QUEUE; //Withdraw queue
     mapping(address => address[]) public LIQUIDITY_OWNERS; //The addresses that hold liquidity positions in a vault
 
     address ADMIN;
@@ -35,14 +40,14 @@ contract VaultManager is ReentrancyGuard{
 
     uint32 private constant LIQUIDITY = 0;
 
-    constructor(VaultLib.Contracts memory _CONTRACTS){
+    constructor(Contracts memory _CONTRACTS){
        _CONTRACTS.VAULT_MANAGER = address(this);
        CONTRACTS = _CONTRACTS;
        ADMIN = msg.sender;
     }
 
     //set some global params here
-    function updatePlatformParams(address[] memory _WHITELISTED_COLLECTIONS, VaultLib.SUPPORTED_COLLECTIONS[] memory _supported_collections) public onlyAdmin{
+    function updatePlatformParams(address[] memory _WHITELISTED_COLLECTIONS, SUPPORTED_COLLECTIONS[] memory _supported_collections) public onlyAdmin{
         require(_WHITELISTED_COLLECTIONS.length == _supported_collections.length, "Lengths must be equal");
 
         
@@ -54,8 +59,8 @@ contract VaultManager is ReentrancyGuard{
 
     }
 
-    function validCollectionCheck(VaultLib.SUPPORTED_COLLECTIONS memory current_value) public view returns (bool) {
-        VaultLib.SUPPORTED_COLLECTIONS memory platform_value = WHITELISTED_DETAILS[current_value.COLLECTION];
+    function validCollectionCheck(SUPPORTED_COLLECTIONS memory current_value) public view returns (bool) {
+        SUPPORTED_COLLECTIONS memory platform_value = WHITELISTED_DETAILS[current_value.COLLECTION];
 
         if (platform_value.MAX_LTV == 0){
             console.log("LTV FAIL 1");
@@ -106,7 +111,7 @@ contract VaultManager is ReentrancyGuard{
     }
 
     //Vault Creation
-    function createVault(VaultLib.creationParams memory _params, address[] memory _WHITELISTED_COLLECTIONS, VaultLib.SUPPORTED_COLLECTIONS[] memory _supported_collections) public returns (address vault) {
+    function createVault(CreationParams memory _params, address[] memory _WHITELISTED_COLLECTIONS, SUPPORTED_COLLECTIONS[] memory _supported_collections) public returns (address vault) {
         // VaultLib.VaultDetails memory _details
         vault = Clones.clone(CONTRACTS.BASE_VAULT);
 
@@ -119,7 +124,7 @@ contract VaultManager is ReentrancyGuard{
             require(validCollectionCheck(_supported_collections[i]) == true);
         }
 
-        IVault(vault).initialize(VaultLib.VaultDetails({
+        IVault(vault).initialize(VaultDetails({
             VAULT_NAME: _params.VAULT_NAME,
             VAULT_DESCRIPTION: _params.VAULT_DESCRIPTION,
             CONTRACTS: CONTRACTS,
@@ -142,7 +147,7 @@ contract VaultManager is ReentrancyGuard{
         require(isValidVault(_CURRENT_VAULT) == true, "Vault is not valid");
         require(isValidVault(_NEXT_VAULT) == true, "Vault is not valid");
 
-        VaultLib.VaultDetails memory OldDetails = IVault(_CURRENT_VAULT).getVaultDetails();
+        VaultDetails memory OldDetails = IVault(_CURRENT_VAULT).getVaultDetails();
         require(msg.sender == OldDetails.VAULT_CREATOR, "Only creater can set rollover vault");
         require(block.timestamp + 14 days < OldDetails.CREATION_TIME + OldDetails.EXPIRY_IN, "Must be set at least 14 days before expiry");
 
@@ -160,7 +165,7 @@ contract VaultManager is ReentrancyGuard{
 
 
         //Current Vault Must be expired
-        VaultLib.VaultDetails memory VAULT_DETAILS = IVault(_CURRENT_VAULT).getVaultDetails();
+        VaultDetails memory VAULT_DETAILS = IVault(_CURRENT_VAULT).getVaultDetails();
         require(block.timestamp > VAULT_DETAILS.CREATION_TIME + VAULT_DETAILS.EXPIRY_IN);
 
 
@@ -230,7 +235,7 @@ contract VaultManager is ReentrancyGuard{
     }
 
     function addLiquidity(uint256 _amount, address _vault)  external {
-        VaultLib.VaultDetails memory VAULT_DETAILS = IVault(_vault).getVaultDetails();
+        VaultDetails memory VAULT_DETAILS = IVault(_vault).getVaultDetails();
 
         require(block.timestamp < VAULT_DETAILS.CREATION_TIME + VAULT_DETAILS.EXPIRY_IN);
 
@@ -271,7 +276,7 @@ contract VaultManager is ReentrancyGuard{
 
         if (balance <= shares) {revert();}
 
-        WITHDRAW_QUEUE[_vault].push(VaultLib.Withdrawl({
+        WITHDRAW_QUEUE[_vault].push(Withdrawl({
             user: msg.sender,
             shares: shares
         }));
@@ -284,7 +289,7 @@ contract VaultManager is ReentrancyGuard{
         return vaults;
     }
 
-    function getWhitelistedDetails(address _vault) public view returns (VaultLib.SUPPORTED_COLLECTIONS memory) {
+    function getWhitelistedDetails(address _vault) public view returns (SUPPORTED_COLLECTIONS memory) {
         return WHITELISTED_DETAILS[_vault];
     }
 }

@@ -1,16 +1,24 @@
 pragma solidity ^0.8.9;
 
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import { ERC1155 } from "solmate/tokens/ERC1155.sol";
 
-import "solmate/tokens/ERC1155.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/utils/math/Math.sol";
-import "prb-math/contracts/PRBMathSD59x18.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { PRBMathSD59x18 } from "prb-math/contracts/PRBMathSD59x18.sol";
 
-import "./interfaces/IVault.sol";
-import "./interfaces/IPepeFiOracle.sol";
-import "./interfaces/IVaultManager.sol";
+import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
+import { IVault } from "./interfaces/IVault.sol";
+import { IPepeFiOracle } from "./interfaces/IPepeFiOracle.sol";
+import { IVaultManager } from "./interfaces/IVaultManager.sol";
+
+import { 
+    VaultDetails,
+    LoanDetails,
+    LoanCreation,
+    SUPPORTED_COLLECTIONS 
+} from "./VaultLib.sol";
 
 contract Vault is ERC1155, ReentrancyGuard {
 
@@ -18,7 +26,11 @@ contract Vault is ERC1155, ReentrancyGuard {
                              INITIALIZATION
     //////////////////////////////////////////////////////////////*/
 
-    function initialize(VaultLib.VaultDetails memory _VAULT_DETAILS, address[] memory _WHITELISTED_COLLECTIONS, VaultLib.SUPPORTED_COLLECTIONS[] memory _supported_collections) external{
+    function initialize(
+        VaultDetails memory _VAULT_DETAILS, 
+        address[] memory _WHITELISTED_COLLECTIONS, 
+        SUPPORTED_COLLECTIONS[] memory _supported_collections
+    ) external {
         // changed: assertion to require statement and added error message
         // todo: create custom errors to save gas, and move to those
         require(VAULT_DETAILS.CONTRACTS.PEPEFI_ADMIN == address(0), "ALREADY_INITIALIZED"); //call only once
@@ -49,18 +61,18 @@ contract Vault is ERC1155, ReentrancyGuard {
 
     uint256 private PENDING_WITHDRAW; //Amount of asset that came from previous vault that is pending to be withdrawn
 
-    mapping(uint256 => VaultLib.loanDetails) public _loans; //list of loans done
+    mapping(uint256 => LoanDetails) public _loans; //list of loans done
    
     uint32 private constant LIQUIDITY = 0;
     /// changed: no initialization of _nextId — previous implementation skipped 1
     uint256 private _nextId; /// The ID of the next token that will be minted. Skips 0
 
-    VaultLib.VaultDetails private VAULT_DETAILS;
+    VaultDetails private VAULT_DETAILS;
 
     bool private onlyOnce = true;
 
     address[] public WHITELISTED_COLLECTIONS;
-    mapping(address => VaultLib.SUPPORTED_COLLECTIONS) public WHITELISTED_DETAILS;
+    mapping(address => SUPPORTED_COLLECTIONS) public WHITELISTED_DETAILS;
 
     /*//////////////////////////////////////////////////////////////
                                 MODIFIERS
@@ -111,7 +123,7 @@ contract Vault is ERC1155, ReentrancyGuard {
         //this loop thru active loans and liquidated assets. 2 birds 1 stone.
         // changed: removed i definition & made i incrementation unchecked to save gas
         for (uint i; i < ALL_LOANS.length; ) {
-            VaultLib.loanDetails memory details = _loans[ALL_LOANS[i]];
+            LoanDetails memory details = _loans[ALL_LOANS[i]];
             
             uint256 oraclePrice = IPepeFiOracle(VAULT_DETAILS.CONTRACTS.ORACLE_CONTRACT).getPrice(details.collateral, details.assetId);
 
@@ -158,12 +170,12 @@ contract Vault is ERC1155, ReentrancyGuard {
         uint256 _loanAmount, 
         uint32 _duration
     ) external nonReentrant checkExpired returns (uint256){
-        VaultLib.SUPPORTED_COLLECTIONS memory risk_params = WHITELISTED_DETAILS[nftCollateralContract];
+        SUPPORTED_COLLECTIONS memory risk_params = WHITELISTED_DETAILS[nftCollateralContract];
 
         uint max_ltv = risk_params.MAX_LTV - (_duration / 100) * risk_params.slope;
 
         // changed: expirty => expiry, keyboard typo
-        return _createLoan(VaultLib.loanCreation({
+        return _createLoan(LoanCreation({
             nftCollateralContract: nftCollateralContract, 
             nftCollateralId: nftCollateralId, 
             loanPrincipal: Math.min(Math.min(_loanAmount, max_ltv * IPepeFiOracle(VAULT_DETAILS.CONTRACTS.ORACLE_CONTRACT).getPrice(nftCollateralContract, nftCollateralId)), risk_params.MAX_LOAN), 
@@ -174,7 +186,7 @@ contract Vault is ERC1155, ReentrancyGuard {
     }
 
     // changed: defined return variable
-    function _createLoan(VaultLib.loanCreation memory new_loan) internal returns (uint256 loanId){
+    function _createLoan(LoanCreation memory new_loan) internal returns (uint256 loanId){
         // changed: set assertions as require statements, and added error messages
         // changed: expirty => expiry, keyboard typo
         // todo: create custom errors to save gas, and move to those
@@ -191,7 +203,7 @@ contract Vault is ERC1155, ReentrancyGuard {
         // changed: increment _nextId and save to memory, previous implementation repeatedly read from storage ($$$)
         loanId = ++_nextId;
 
-        _loans[loanId] = VaultLib.loanDetails({
+        _loans[loanId] = LoanDetails({
             timestamp: block.timestamp,
             collateral: new_loan.nftCollateralContract,
             assetId: new_loan.nftCollateralId,
@@ -206,7 +218,7 @@ contract Vault is ERC1155, ReentrancyGuard {
     }
 
     function repayLoan(uint32 _loanId) external {
-        VaultLib.loanDetails storage curr_loan = _loans[_loanId];
+        LoanDetails storage curr_loan = _loans[_loanId];
 
         // changed: set assertion as require statement, and added error message
         // todo: create custom errors to save gas, and move to those
@@ -245,7 +257,7 @@ contract Vault is ERC1155, ReentrancyGuard {
         _burn(msg.sender, _loanId, 1);
     }
 
-    function getVaultDetails() external view returns (VaultLib.VaultDetails memory){
+    function getVaultDetails() external view returns (VaultDetails memory){
         return VAULT_DETAILS;
     }
 
@@ -255,7 +267,7 @@ contract Vault is ERC1155, ReentrancyGuard {
 
     /// todo: test gas vs Solady library for searching through array 
     ///       https://github.com/Vectorized/solady/blob/main/src/utils/LibSort.sol#L290
-    function updateWhitelistDetails(address _collection,  VaultLib.SUPPORTED_COLLECTIONS memory _detail) public onlyVaultManager {
+    function updateWhitelistDetails(address _collection, SUPPORTED_COLLECTIONS memory _detail) public onlyVaultManager {
         //make sure LTV is not increase 5% from initial while keeping global requirements or sth like that?
         
         // changed: added error message
