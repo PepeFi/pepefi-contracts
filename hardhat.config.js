@@ -45,7 +45,7 @@ module.exports = {
     currency: 'USD'
   },
   etherscan: {
-    apiKey: "ETHERSCAN_API"
+    apiKey: process.env.ETHERSCAN_API
   },
   gasPrice: 0
 };

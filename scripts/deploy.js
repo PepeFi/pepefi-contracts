@@ -226,9 +226,11 @@ async function deploy(){
 
     ABI_STRING = ABI_STRING + "let WETH_CONTRACT='" + weth.address + "'\n"
     ABI_STRING = ABI_STRING + "let VAULT_MANAGER='" + vm.address + "'\n"
-    ABI_STRING = ABI_STRING + "let VAULT_MANAGER='" + vm.address + "'\n"
     ABI_STRING = ABI_STRING + "let ORACLE='" + or.address + "'\n\n"
-    export_string = export_string + "WETH_CONTRACT,ORACLE,VAULT_MANAGER}"
+    ABI_STRING = ABI_STRING + "let JPEG_NFT='" + mynft.address + "'\n\n"
+    ABI_STRING = ABI_STRING + "let UNI_NFT='" + fnft.address + "'\n\n"
+
+    export_string = export_string + "WETH_CONTRACT,ORACLE,VAULT_MANAGER,JPEG_NFT,UNI_NFT}"
 
     ABI_STRING = ABI_STRING + export_string
 
