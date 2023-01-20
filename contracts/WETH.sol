@@ -11,7 +11,6 @@ contract WETH is IERC20 {
     mapping (address => uint256) private _balances;
     mapping (address => bool) private isMinted;
     mapping (address => mapping (address => uint256)) private _allowed;
-    mapping (address => bool) public whitelisted;
 
     address owner;
 
@@ -37,11 +36,6 @@ contract WETH is IERC20 {
         return _totalSupply;
     }
 
-    function addWhitelisted(address[] calldata _addresses) public onlyOwner {
-        for (uint i=0; i <  _addresses.length; i++){
-            whitelisted[_addresses[i]] = true;
-        }
-    }
 
     /**
      * @dev Gets the balance of the specified address.
@@ -139,10 +133,6 @@ contract WETH is IERC20 {
     function _transfer(address from, address to, uint256 value) internal {
         require(to != address(0));
 
-        // if (whitelisted[from] == false && whitelisted[to] == false){
-        //     require(whitelisted[to] == true, "The address is not whitelisted");
-        // }
-
         _balances[from] = _balances[from] - value;
         _balances[to] = _balances[to] + value;
 
@@ -157,10 +147,8 @@ contract WETH is IERC20 {
      */
     function mint(address account) external {
         require(account != address(0));
-        // require(isMinted[account] == false);
         _totalSupply = _totalSupply + at_once;
         _balances[account] = _balances[account] + at_once;
-        isMinted[account] = true;
         emit Transfer(address(0), account, at_once);
     }
 

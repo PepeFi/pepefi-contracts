@@ -2,6 +2,158 @@
   {
     "inputs": [
       {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "nftCollateralContract",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "nftCollateralId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "loanPrincipal",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "apr",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "loanExpirty",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct VaultLib.loanCreation",
+        "name": "new_loan",
+        "type": "tuple"
+      }
+    ],
+    "name": "_createLoan",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "_loans",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "collateral",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "assetId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "expiry",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "loanPrincipalAmount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "repaymentAmount",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct VaultLib.loanDetails",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint32",
+        "name": "_loanId",
+        "type": "uint32"
+      },
+      {
+        "internalType": "address",
+        "name": "transferTo",
+        "type": "address"
+      },
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "collateral",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "assetId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "expiry",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "loanPrincipalAmount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "repaymentAmount",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct VaultLib.loanDetails",
+        "name": "curr_loan",
+        "type": "tuple"
+      }
+    ],
+    "name": "_repayLoan",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "_owner",
         "type": "address"
@@ -159,6 +311,77 @@
         "internalType": "uint256",
         "name": "",
         "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "getWhitelistedDetails",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "COLLECTION",
+            "type": "address"
+          },
+          {
+            "internalType": "enum VaultLib.COLLECTION_TYPE",
+            "name": "TYPE",
+            "type": "uint8"
+          },
+          {
+            "internalType": "address",
+            "name": "VAULUATION_PERFORMER",
+            "type": "address"
+          },
+          {
+            "internalType": "uint32",
+            "name": "MAX_LTV",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "MAX_DURATION",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "APR",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "slope",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "MAX_LOAN",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string[]",
+            "name": "ALLOWED_TRAITS",
+            "type": "string[]"
+          },
+          {
+            "internalType": "uint32[]",
+            "name": "TRAIT_MULTIPLIER",
+            "type": "uint32[]"
+          }
+        ],
+        "internalType": "struct VaultLib.SUPPORTED_COLLECTIONS",
+        "name": "",
+        "type": "tuple"
       }
     ],
     "stateMutability": "view",

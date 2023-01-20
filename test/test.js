@@ -15,7 +15,7 @@ describe('Contract tests', () => {
 
     before('Deploy Contract and Transfer Tokens', async () => {
         [owner] = await ethers.getSigners();
-        [weth, mynft, fnft, pe, s_or, svb, vm, uw, WETH_CONTRACT] = await deployContracts(testnet=true, receivers=[owner.address]);
+        [weth, mynft, fnft, pe, s_or, svb, vm, uw, WETH_CONTRACT, addresses] = await deployContracts(testnet=true, receivers=[owner.address]);
 
 
         let vaults = await vm.getVaults()
@@ -87,6 +87,7 @@ describe('Contract tests', () => {
 
 
         await vault.takeERC721Loan(mynft.address, 1, String(10**16),   30);
+        await vm.addLiquidity(10, vault.address);
 
         let all_loans = await vault.getAllLoans()
         let curr_loan = all_loans[all_loans.length-1]

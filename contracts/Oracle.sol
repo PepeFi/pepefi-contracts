@@ -54,11 +54,11 @@ contract Oracle {
             AggregatorV3Interface priceFeed = AggregatorV3Interface(COLLECTION_DETAILS.VAULUATION_PERFORMER);
             (, int256 answer, , uint256 updatedAt, ) = priceFeed.latestRoundData();
 
-            if (answer != 0 && updatedAt > block.timestamp - 9 hours){
+            if (answer != 0){
                 return (uint256(answer) * getTraitBooster(_address, _id)) / 100;
             }
         } else if (COLLECTION_DETAILS.TYPE == VaultLib.COLLECTION_TYPE.Custom) {
-            return prices[_address];
+            return prices[_address] * getTraitBooster(_address, _id);
         } else if (COLLECTION_DETAILS.TYPE == VaultLib.COLLECTION_TYPE.SmartContract) {
            return ICustomWrapper(COLLECTION_DETAILS.VAULUATION_PERFORMER).getPrice(_address, _id);
         }

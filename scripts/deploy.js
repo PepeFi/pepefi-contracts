@@ -102,6 +102,7 @@ async function deployContracts(testnet=true, receivers=[]){
     let mynft;
     let fnft;
     let [signer] = await ethers.getSigners();
+    let addresses = {}
 
     WETH_CONTRACT = '0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6';
     const feeData = await signer.provider.getFeeData();
@@ -112,16 +113,19 @@ async function deployContracts(testnet=true, receivers=[]){
         weth = await WETH.deploy(signer.address);
         await weth.deployed();  
         console.log("WETH Contract Deployed at " + weth.address);
+        addresses['WETH'] = weth.address
 
         const MyNFT = await ethers.getContractFactory("MyNFT");
         mynft = await MyNFT.deploy("FakeApeYachtClub", "FAYC");
         await mynft.deployed();  
         console.log("FAYC Contract Deployed at " + mynft.address);
+        addresses['FAYC'] = mynft.address
 
         const FNFT = await ethers.getContractFactory("FNFT");
         fnft = await FNFT.deploy("Fake Uniswap Position", "FUNI");
         await fnft.deployed();  
         console.log("FUNI Contract Deployed at " + fnft.address);
+        addresses['FUNI'] = fnft.address
 
         for (let addy of receivers) {
             await weth.mint(addy)
@@ -140,12 +144,14 @@ async function deployContracts(testnet=true, receivers=[]){
     pe = await PepeAuction.deploy(WETH_CONTRACT);
     await pe.deployed();  
     console.log("Auction Contract Deployed at " + pe.address);
+    addresses['Auction'] = pe.address
 
 
     const Oracle = await ethers.getContractFactory("Oracle");
     or = await Oracle.deploy(signer.address);
     await or.deployed(); 
     console.log("Oracle Contract Deployed at " + or.address);
+    addresses['Oracle'] = or.address
     
 
     const Vault = await ethers.getContractFactory("Vault");
@@ -156,12 +162,14 @@ async function deployContracts(testnet=true, receivers=[]){
     uw = await UniswapWrapper.deploy(fnft.address, fnft.address)
     await uw.deployed();  
     console.log("Uniswap Wrapper Deployed at " + uw.address);
+    addresses['Uni_Wrapper'] = uw.address
 
     const VaultManager = await ethers.getContractFactory("VaultManager");
     console.log({ASSET: WETH_CONTRACT, AUCTION_CONTRACT: pe.address, BASE_VAULT: vb.address, ORACLE_CONTRACT: or.address, PEPEFI_ADMIN: signer.address, VAULT_MANAGER: '0x0000000000000000000000000000000000000000'})
     let vm = await VaultManager.deploy({ASSET: WETH_CONTRACT, AUCTION_CONTRACT: pe.address, BASE_VAULT: vb.address, ORACLE_CONTRACT: or.address, PEPEFI_ADMIN: signer.address, VAULT_MANAGER: '0x0000000000000000000000000000000000000000'} );
     await vm.deployed();  
     console.log("Vault Manager Contract Deployed at " + vm.address);
+    addresses['VM'] = vm.address
 
     await or.setVaultManager(vm.address);
 
@@ -183,12 +191,12 @@ async function deployContracts(testnet=true, receivers=[]){
     // await weth.addWhitelisted([vaults[0]])
 
 
-    return [weth, mynft, fnft, pe, or, vb, vm, uw, WETH_CONTRACT]
+    return [weth, mynft, fnft, pe, or, vb, vm, uw, WETH_CONTRACT, addresses]
 }
 
 async function deploy(){
 
-    let [weth, mynft, fnft, pe, or, vb, vm, uw, WETH_CONTRACT] = await deployContracts()
+    let [weth, mynft, fnft, pe, or, vb, vm, uw, WETH_CONTRACT, addresses] = await deployContracts()
 
 
     let ABI_STRING = ""
@@ -225,10 +233,12 @@ async function deploy(){
     ABI_STRING = ABI_STRING + export_string
 
     if (process.env.HARDHAT_NETWORK == 'goerli'){
-        fs.writeFileSync('src/config_goerli.js', ABI_STRING);   
+        fs.writeFileSync('config_goerli.js', ABI_STRING);   
+        fs.writeFileSync('data_goerli.json', JSON.stringify(addresses, null, 2) , 'utf-8');
     }
     else{
-        fs.writeFileSync('src/config.js', ABI_STRING);
+        fs.writeFileSync('config.js', ABI_STRING);
+        fs.writeFileSync('data.json', JSON.stringify(addresses, null, 2) , 'utf-8');
     }
 }
 

@@ -3,6 +3,7 @@ require('hardhat-abi-exporter');
 require("hardhat-interface-generator");
 require('hardhat-contract-sizer');
 require("hardhat-gas-reporter");
+require("@nomiclabs/hardhat-etherscan");
 
 require('dotenv').config()
 /**
@@ -42,6 +43,9 @@ module.exports = {
   },
   gasReporter: {
     currency: 'USD'
+  },
+  etherscan: {
+    apiKey: "ETHERSCAN_API"
   },
   gasPrice: 0
 };
