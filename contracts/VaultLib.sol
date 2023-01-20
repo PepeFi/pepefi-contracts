@@ -15,7 +15,7 @@ library VaultLib{
         uint256 nftCollateralId;
         uint256 loanPrincipal; 
         uint256 apr;
-        uint256 loanExpirty;
+        uint256 loanExpiry;
     }
 
     struct Contracts {
