@@ -60,7 +60,7 @@ function getGenericVaultParams(mynft, fnft, uw, is_platform) {
         MAX_DURATION = 90
         slope = 1
         APR = 450
-        MAX_LOAN = '1000000000000000000'
+        MAX_LOAN = '30000000000000000000'
         ALLOWED_MAX_MULTIPLIER = [800, 350, 350, 300, 125]
     }
 
