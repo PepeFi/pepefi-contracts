@@ -177,14 +177,16 @@ contract Vault is ERC1155, ReentrancyGuard {
         //this loop thru active loans and liquidated assets. 2 birds 1 stone.
         for (uint i=0; i<ALL_LOANS.length; i++) {
             VaultLib.loanDetails memory details = _loans[ALL_LOANS[i]];
-            
-            uint256 oraclePrice = IPepeFiOracle(VAULT_DETAILS.CONTRACTS.ORACLE_CONTRACT).getPrice(details.collateral, details.assetId);
+            if (details.timestamp != 0){ //for repaid loans
+                 uint256 oraclePrice = IPepeFiOracle(VAULT_DETAILS.CONTRACTS.ORACLE_CONTRACT).getPrice(details.collateral, details.assetId);
 
-            if (oraclePrice * 900/1000 < details.repaymentAmount){
-                loanBalance = loanBalance + (oraclePrice * 900/1000);
-            } else {
-                loanBalance = loanBalance + details.loanPrincipalAmount;
+                if (oraclePrice * 900/1000 < details.repaymentAmount){
+                    loanBalance = loanBalance + (oraclePrice * 900/1000);
+                } else {
+                    loanBalance = loanBalance + details.loanPrincipalAmount;
+                }
             }
+           
         }
 
         return IERC20(ASSET).balanceOf(address(this)) + loanBalance;

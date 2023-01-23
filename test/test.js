@@ -66,7 +66,7 @@ describe('Contract tests', () => {
         }
 
         expect(array[0]['type']).to.equal(2);
-
+        expect(array[1]['type']).to.equal(1);
         
     })
 
@@ -98,93 +98,93 @@ describe('Contract tests', () => {
         let curr_loan = all_loans[all_loans.length-1]
         let loanDetails = await vault._loans(curr_loan)
 
-        expect((loanDetails.repaymentAmount/10**16).toFixed(3)).to.be.oneOf(['1.037']);
-        // expect(loanDetails.expiry).to.equal(repaymentDate);
+        expect((loanDetails.repaymentAmount/10**16).toFixed(3)).to.be.oneOf(['1.021']);
         expect(loanDetails.loanPrincipalAmount).to.equal('10000000000000000');
 
         await weth.approve(vault.address, ethers.constants.MaxUint256);
+
+        expect(await vault.getWETHBalance()/10**18).to.be.oneOf([1]);
+
         await vault.repayLoan(curr_loan)
 
     })
 
     it("Take and Repay Financial Loan", async function () {
         await fnft.approve(vault.address, 1)
-
         await vault.takeERC721Loan(fnft.address, 1, String(10**16),   30);
         let all_loans = await vault.getAllLoans()
         let curr_loan = all_loans[all_loans.length-1]
         let loanDetails = await vault._loans(curr_loan)
 
-        expect((loanDetails.repaymentAmount/10**16).toFixed(3)).to.be.oneOf(['1.037']);
+        expect((loanDetails.repaymentAmount/10**16).toFixed(3)).to.be.oneOf(['1.021']);
         expect(loanDetails.loanPrincipalAmount).to.equal('10000000000000000');
 
-
-        console.log(await vault.getWETHBalance());
+        expect((await vault.getWETHBalance()/10**18).toFixed(3)).to.be.oneOf(['1.000']);
 
         await vault.repayLoan(curr_loan)
 
     })
 
-    // it("Rollover", async function () {
+    it("Rollover", async function () {
 
-    //     await mynft.approve(vault.address, 2)
-    //     await vault.takeERC721Loan(mynft.address, 2, String(10**16),   30);
+        await mynft.approve(vault.address, 2)
+        await vault.takeERC721Loan(mynft.address, 2, String(10**16),   30);
 
-    //     let [vaultDetails, collections, collection_details] = getGenericVaultParams(mynft, fnft, uw, false)
-    //     await vm.createVault(vaultDetails, collections, collection_details)
+        let [vaultDetails, collections, collection_details] = getGenericVaultParams(mynft, fnft, uw, false)
+        await vm.createVault(vaultDetails, collections, collection_details)
 
-    //     let vaults = await vm.getVaults()
+        let vaults = await vm.getVaults()
 
-    //     const Vault = await ethers.getContractFactory("Vault");
-    //     let new_vault = await Vault.attach(vaults[vaults.length-1]);
+        const Vault = await ethers.getContractFactory("Vault");
+        let new_vault = await Vault.attach(vaults[vaults.length-1]);
 
 
-    //     await vm.setRolloverVault(vault.address, new_vault.address)
-    //     expect(await vm.NEXT_VAULT(vault.address)).to.equal(new_vault.address)
+        await vm.setRolloverVault(vault.address, new_vault.address)
+        expect(await vm.NEXT_VAULT(vault.address)).to.equal(new_vault.address)
         
-    //     await vm.withdrawLiquidity(100, vault.address)
+        await vm.withdrawLiquidity(100, vault.address)
 
-    //     withdraw_queue = await vm.WITHDRAW_QUEUE(vault.address, 0)
+        withdraw_queue = await vm.WITHDRAW_QUEUE(vault.address, 0)
 
-    //     expect(withdraw_queue.shares).to.equal(100)
-    //     expect(withdraw_queue.user).to.equal(owner.address)
+        expect(withdraw_queue.shares).to.equal(100)
+        expect(withdraw_queue.user).to.equal(owner.address)
 
-    //     await vault.expireVault()
-
-
-    //     expect(parseInt(await weth.balanceOf(vault.address))).to.greaterThan(0)
-    //     expect(await weth.balanceOf(new_vault.address)).to.equal(0)
-    //     expect(await vm.VAULT_ASSETS(vault.address)).to.equal(0)
-    //     expect(await vm.VAULT_ASSETS(new_vault.address)).to.equal(0)
-
-    //     //see current assets
-    //     await vm.rolloverToNewVault(vault.address)
-
-    //     expect(await weth.balanceOf(vault.address)).to.equal(0)
-    //     expect(parseInt(await weth.balanceOf(new_vault.address))).to.greaterThan(0)
-
-    //     expect(await vm.VAULT_ASSETS(vault.address)).to.equal(0)
-    //     expect(parseInt(await vm.VAULT_ASSETS(new_vault.address))).to.greaterThan(0) 
+        await vault.expireVault()
 
 
-    //     expect(await vault.isRollable()).to.equal(false)
-    //     await expect(vm.performOldRollover(new_vault.address, vault.address)).to.be.revertedWith("Previous loans must be settled")
+        expect(parseInt(await weth.balanceOf(vault.address))).to.greaterThan(0)
+        expect(await weth.balanceOf(new_vault.address)).to.equal(0)
+        expect(await vm.VAULT_ASSETS(vault.address)).to.equal(0)
+        expect(await vm.VAULT_ASSETS(new_vault.address)).to.equal(0)
 
-    //     let all_loans = await vault.getAllLoans()
-    //     let curr_loan = all_loans[all_loans.length-1]
+        //see current assets
+        await vm.rolloverToNewVault(vault.address)
 
-    //     await vault.repayLoan(curr_loan)
+        expect(await weth.balanceOf(vault.address)).to.equal(0)
+        expect(parseInt(await weth.balanceOf(new_vault.address))).to.greaterThan(0)
 
-    //     expect(parseInt(await vault.balanceOf(owner.address, 0))).to.greaterThan(0)
-    //     expect(await new_vault.balanceOf(owner.address, 0)).to.equal(0)
+        expect(await vm.VAULT_ASSETS(vault.address)).to.equal(0)
+        expect(parseInt(await vm.VAULT_ASSETS(new_vault.address))).to.greaterThan(0) 
 
-    //     await vm.performOldRollover(new_vault.address, vault.address)
-    //     expect(await vm.ROLLOVER_DONE(new_vault.address)).to.equal(true)
 
-    //     expect(await vault.balanceOf(owner.address, 0)).to.equal(0)
-    //     expect(parseInt(await new_vault.balanceOf(owner.address, 0))).to.greaterThan(0)
+        expect(await vault.isRollable()).to.equal(false)
+        await expect(vm.performOldRollover(new_vault.address, vault.address)).to.be.revertedWith("Previous loans must be settled")
 
-    // })
+        let all_loans = await vault.getAllLoans()
+        let curr_loan = all_loans[all_loans.length-1]
+
+        await vault.repayLoan(curr_loan)
+
+        expect(parseInt(await vault.balanceOf(owner.address, 0))).to.greaterThan(0)
+        expect(await new_vault.balanceOf(owner.address, 0)).to.equal(0)
+
+        await vm.performOldRollover(new_vault.address, vault.address)
+        expect(await vm.ROLLOVER_DONE(new_vault.address)).to.equal(true)
+
+        expect(await vault.balanceOf(owner.address, 0)).to.equal(0)
+        expect(parseInt(await new_vault.balanceOf(owner.address, 0))).to.greaterThan(0)
+
+    })
 
 
 
