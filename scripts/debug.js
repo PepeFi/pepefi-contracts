@@ -11,9 +11,23 @@ async function main() {
     let vaults = await vm.getVaults()
 
     const Vault = await ethers.getContractFactory("Vault");
-    let vault = Vault.attach(vaults[1])
+    let vault = Vault.attach(vaults[0])
+    let first = await vm.WHITELISTED_COLLECTIONS(0)
+    let second = await vm.WHITELISTED_COLLECTIONS(1)
 
-    await vm.addLiquidity(100, vault.address)
+    console.log(await vm.getWhitelistedDetails(first))
+    console.log(await vm.getWhitelistedDetails(second))
+
+    // console.log(await vault.getWETHBalance())
+
+    // const WETH = await ethers.getContractFactory("WETH");
+    // let weth = WETH.attach(contracts['WETH'])
+    // await weth.mint(signer.address)
+    // console.log(await weth.balanceOf(signer.address))
+
+    // await weth.approve(vault.address, ethers.constants.MaxUint256);
+
+    // await vm.addLiquidity("1000000000000000000", vault.address)
 }
 
 main()
