@@ -6,3 +6,4 @@ is-valid-signature/=node_modules/is-valid-signature/
 openzeppelin/=node_modules/@openzeppelin/contracts/
 prb-math/=node_modules/prb-math/
 solmate/=node_modules/solmate/src/
+forge/=lib/forge-std/src/
