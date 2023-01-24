@@ -13,6 +13,7 @@ contract UniswapWrapper {
 
     function getPrice(address _address, uint256 _tokenId) public view returns (uint256) {
         (uint256 token1, uint256 token2) = IPositionValue(UNISWAP_POSITION_VALUE).total(INonfungiblePositionManager(UNISWAP_POSITION_MANAGER), _tokenId, 0);
+        // review: ??
         return token1 * 1 + token2 * 1;
     }
 }
