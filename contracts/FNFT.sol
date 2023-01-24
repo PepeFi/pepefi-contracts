@@ -28,17 +28,21 @@ contract FNFT is Ownable, ERC721URIStorage{
 
     mapping(uint256 => Position) private _positions;
 
-    uint256 tokenId = 1;
+    /// changed: start id from 0
+    uint256 internal tokenId;
 
     constructor(string memory name, string memory symbol) ERC721(name, symbol) {
 
     }
 
 
-    function mint(address recipient, string memory tokenURI) public {        
-        _mint(recipient, tokenId);
-        _setTokenURI(tokenId, tokenURI);
-        _positions[tokenId] = Position({
+    function mint(address recipient, string memory tokenURI) public {   
+        // changed: iterate id first and save to memory     
+        uint id = ++tokenId;
+
+        _mint(recipient, id);
+        _setTokenURI(id, tokenURI);
+        _positions[id] = Position({
             nonce: 0,
             operator: address(0),
             poolId: 0,
@@ -49,12 +53,11 @@ contract FNFT is Ownable, ERC721URIStorage{
             feeGrowthInside1LastX128: 0,
             tokensOwed0: 0,
             tokensOwed1: 0
-        });
-
-        tokenId = tokenId + 1;        
+        });      
     }
 
-    function positions(uint256 tokenId)
+    /// changed: param variable so it doesn't shadow existing declaration
+    function positions(uint256 _tokenId)
         external
         view
         returns (
@@ -72,7 +75,7 @@ contract FNFT is Ownable, ERC721URIStorage{
             uint128 tokensOwed1
         )
     {
-        Position memory position = _positions[tokenId];
+        Position memory position = _positions[_tokenId];
         return (
             position.nonce,
             position.operator,
@@ -89,11 +92,12 @@ contract FNFT is Ownable, ERC721URIStorage{
         );
     }
 
-     function total(
-        INonfungiblePositionManager positionManager,
-        uint256 tokenId,
-        uint160 sqrtRatioX96
-    ) external view returns (uint256 amount0, uint256 amount1) {
+    /// changed: commented out param vars and made pure to remove compiler warning
+    function total(
+        INonfungiblePositionManager /*positionManager*/,
+        uint256 /*_tokenId*/,
+        uint160 /*sqrtRatioX96*/
+    ) external pure returns (uint256 amount0, uint256 amount1) {
         //return a constant for our purpose
         amount0 = 1 ether;
         amount1 = 1 ether;

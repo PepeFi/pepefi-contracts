@@ -4,19 +4,19 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 
 
-contract MyNFT is Ownable, ERC721URIStorage{
-    uint256 tokenId = 1;
+contract MyNFT is Ownable, ERC721URIStorage {
+    /// changed: start from 0
+    uint256 internal tokenId;
 
-    constructor(string memory name, string memory symbol) ERC721(name, symbol) {
-
-    }
+    constructor(string memory name, string memory symbol) ERC721(name, symbol) {}
 
 
-    function mint(address recipient, string memory tokenURI) public {        
-        _mint(recipient, tokenId);
-        _setTokenURI(tokenId, tokenURI);
+    function mint(address recipient, string memory tokenURI) public {  
+        // changed: iterate id first and save to memory  
+        uint id = ++tokenId;
 
-        tokenId = tokenId + 1;        
+        _mint(recipient, id);
+        _setTokenURI(id, tokenURI);      
     }
 
 }
