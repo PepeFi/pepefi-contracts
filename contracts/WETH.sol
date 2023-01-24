@@ -156,14 +156,14 @@ contract WETH is IERC20 {
 
     /**
      * @dev Approve an address to spend another addresses' tokens.
-     * @param owner The address that owns the tokens.
+     * @param _owner The address that owns the tokens.
      * @param spender The address that will spend the tokens.
      * @param value The number of tokens that can be spent.
      */
-    function _approve(address owner, address spender, uint256 value) internal {
+    function _approve(address _owner, address spender, uint256 value) internal {
         require(spender != address(0));
-        require(owner != address(0));
-        _allowed[owner][spender] = value;
-        emit Approval(owner, spender, value);
+        require(_owner != address(0));
+        _allowed[_owner][spender] = value;
+        emit Approval(_owner, spender, value);
     }
 }
