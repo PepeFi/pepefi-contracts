@@ -1,48 +1,83 @@
 pragma solidity ^0.8.9;
 
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import { ERC1155 } from "solmate/tokens/ERC1155.sol";
 
-import "solmate/src/tokens/ERC1155.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/utils/math/Math.sol";
-import "prb-math/contracts/PRBMathSD59x18.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { PRBMathSD59x18 } from "prb-math/contracts/PRBMathSD59x18.sol";
 
-import "./interfaces/IVault.sol";
-import "./interfaces/IPepeFiOracle.sol";
-import "./interfaces/IVaultManager.sol";
+import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
+import { IVault } from "./interfaces/IVault.sol";
+import { IPepeFiOracle } from "./interfaces/IPepeFiOracle.sol";
+import { IVaultManager } from "./interfaces/IVaultManager.sol";
+
+import { 
+    VaultDetails,
+    LoanDetails,
+    LoanCreation,
+    SUPPORTED_COLLECTIONS 
+} from "./VaultLib.sol";
 
 contract Vault is ERC1155, ReentrancyGuard {
+
+    /*//////////////////////////////////////////////////////////////
+                             INITIALIZATION
+    //////////////////////////////////////////////////////////////*/
+
+    function initialize(
+        VaultDetails memory _VAULT_DETAILS, 
+        address[] memory _WHITELISTED_COLLECTIONS, 
+        SUPPORTED_COLLECTIONS[] memory _supported_collections
+    ) external {
+        // changed: assertion to require statement and added error message
+        // todo: create custom errors to save gas, and move to those
+        require(VAULT_DETAILS.CONTRACTS.PEPEFI_ADMIN == address(0), "ALREADY_INITIALIZED"); //call only once
+
+        VAULT_DETAILS = _VAULT_DETAILS;
+        ASSET = IERC20(_VAULT_DETAILS.CONTRACTS.ASSET);
+        WHITELISTED_COLLECTIONS = _WHITELISTED_COLLECTIONS;
+        
+        // changed: made loop more gas efficient
+        uint length = _supported_collections.length;
+        for (uint i; i< length; ) {
+            WHITELISTED_DETAILS[_supported_collections[i].COLLECTION] = _supported_collections[i];
+
+            unchecked { ++i; }
+        }
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                                STORAGE
+    //////////////////////////////////////////////////////////////*/
+
     IERC20 private ASSET; //The underlying ERC20 asset
 
-
     uint256[] private ALL_LOANS; //List of active loans on previous vault
-
 
     uint256[] private PREVIOUS_WITHDRAW; //Rolled over loans from previous vault that should be withdrawed
     uint256[] private NEXT_WITHDRAW; //Withdraw queue that will be withdrawn
 
-
-
     uint256 private PENDING_WITHDRAW; //Amount of asset that came from previous vault that is pending to be withdrawn
 
-
-    mapping(uint256 => VaultLib.loanDetails) public _loans; //list of loans done
+    mapping(uint256 => LoanDetails) public _loans; //list of loans done
    
-    
     uint32 private constant LIQUIDITY = 0;
-    uint256 private _nextId = 1; /// The ID of the next token that will be minted. Skips 0
+    /// changed: no initialization of _nextId — previous implementation skipped 1
+    uint256 private _nextId; /// The ID of the next token that will be minted. Skips 0
 
-
-    VaultLib.VaultDetails private VAULT_DETAILS;
+    VaultDetails private VAULT_DETAILS;
 
     bool private onlyOnce = true;
 
     address[] public WHITELISTED_COLLECTIONS;
-    mapping(address => VaultLib.SUPPORTED_COLLECTIONS) public WHITELISTED_DETAILS;
+    mapping(address => SUPPORTED_COLLECTIONS) public WHITELISTED_DETAILS;
 
-    
-    //Modifiers
+    /*//////////////////////////////////////////////////////////////
+                                MODIFIERS
+    //////////////////////////////////////////////////////////////*/
+
     modifier checkExpired {
         require(block.timestamp < VAULT_DETAILS.CREATION_TIME + VAULT_DETAILS.EXPIRY_IN);
         _;
@@ -58,7 +93,10 @@ contract Vault is ERC1155, ReentrancyGuard {
         _;
     }
 
-    //Rollover Management
+    /*//////////////////////////////////////////////////////////////
+                              ROLLOVER LOGIC
+    //////////////////////////////////////////////////////////////*/
+
     function performTransferFrom(address from, address to, uint256 sendingAmt) external onlyVaultManager returns (bool) {
         return ASSET.transferFrom(from, to, sendingAmt); //send WETH
     }
@@ -76,66 +114,115 @@ contract Vault is ERC1155, ReentrancyGuard {
         _mint(account, id, amount, "");
     }
 
-    function initialize(VaultLib.VaultDetails memory _VAULT_DETAILS, address[] memory _WHITELISTED_COLLECTIONS, VaultLib.SUPPORTED_COLLECTIONS[] memory _supported_collections) external{
-        if (VAULT_DETAILS.CONTRACTS.PEPEFI_ADMIN != address(0)) {revert();} //call only once
-        VAULT_DETAILS = _VAULT_DETAILS;
-        ASSET = IERC20(_VAULT_DETAILS.CONTRACTS.ASSET);
-        WHITELISTED_COLLECTIONS = _WHITELISTED_COLLECTIONS;
+    //Removing and adding liquidity
+    /// changed: made function external — if used internally, create a duplicate internal function _getWETHBalance for gas
+    ///          and put it in the body of this function
+    function getWETHBalance() external view returns (uint256) {
+        uint256 loanBalance = 0;
 
-        for (uint i=0; i<=_supported_collections.length-1; i++) {
-            WHITELISTED_DETAILS[_supported_collections[i].COLLECTION] = _supported_collections[i];
+        //this loop thru active loans and liquidated assets. 2 birds 1 stone.
+        // changed: removed i definition & made i incrementation unchecked to save gas
+        for (uint i; i < ALL_LOANS.length; ) {
+            LoanDetails memory details = _loans[ALL_LOANS[i]];
+            
+            uint256 oraclePrice = IPepeFiOracle(VAULT_DETAILS.CONTRACTS.ORACLE_CONTRACT).getPrice(details.collateral, details.assetId);
+
+            if (oraclePrice * 900/1000 < details.repaymentAmount){
+                loanBalance = loanBalance + (oraclePrice * 900/1000);
+            } else {
+                loanBalance = loanBalance + details.loanPrincipalAmount;
+            }
+
+            unchecked { ++i; }
         }
+
+        return IERC20(ASSET).balanceOf(address(this)) + loanBalance;
     }
 
-    
-    function _createLoan(VaultLib.loanCreation memory new_loan) private returns (uint256){
-        require(new_loan.loanExpirty < VAULT_DETAILS.CREATION_TIME + (VAULT_DETAILS.EXPIRY_IN * 2)); //loan must settle in the next vault
-        if(new_loan.loanExpirty < block.timestamp) {revert();}
-        if(ASSET.balanceOf(address(this)) < new_loan.loanPrincipal) {revert();}
-
-        bool success = ASSET.transfer(msg.sender, new_loan.loanPrincipal);
-
-        if (success == false) {revert();}
-
-        IERC721(new_loan.nftCollateralContract).transferFrom(msg.sender, address(this), new_loan.nftCollateralId); //Transfer the NFT to our wallet. 
-
-        _loans[_nextId+1] = VaultLib.loanDetails({
-                timestamp: block.timestamp,
-                collateral: new_loan.nftCollateralContract,
-                assetId: new_loan.nftCollateralId,
-                expiry: new_loan.loanExpirty,
-                loanPrincipalAmount: new_loan.loanPrincipal, 
-                repaymentAmount: (((new_loan.loanExpirty-block.timestamp) * new_loan.apr * new_loan.loanPrincipal))/31536000000 + new_loan.loanPrincipal
-            });
-
-        ALL_LOANS.push(_nextId+1);
-
-        _mint(msg.sender, _nextId+1, 1, "");
-        _nextId++;
+    /// changed: made function external — if used internally, create a duplicate internal function _isRollable for gas
+    ///          and put it in the body of this function
+    function isRollable() external view returns (bool) {
         
-        return _nextId;
+        // changed: made loop more gas effecient
+
+        uint[] memory _allLoans = ALL_LOANS;
+
+        uint length = _allLoans.length;
+
+        for (uint i; i < length; ) {
+            if (_loans[ALL_LOANS[i]].timestamp != 0) {
+                return false;
+            }
+
+            unchecked { ++i; }
+        }
+
+        return true;
     }
 
-    function takeERC721Loan(address nftCollateralContract, uint256 nftCollateralId, uint256 _loanAmount, uint32 _duration) external nonReentrant checkExpired returns (uint256){
-        
-        VaultLib.SUPPORTED_COLLECTIONS memory risk_params = WHITELISTED_DETAILS[nftCollateralContract];
+    /*//////////////////////////////////////////////////////////////
+                               LOANS
+    //////////////////////////////////////////////////////////////*/
+
+    function takeERC721Loan(
+        address nftCollateralContract, 
+        uint256 nftCollateralId, 
+        uint256 _loanAmount, 
+        uint32 _duration
+    ) external nonReentrant checkExpired returns (uint256){
+        SUPPORTED_COLLECTIONS memory risk_params = WHITELISTED_DETAILS[nftCollateralContract];
 
         uint max_ltv = risk_params.MAX_LTV - (_duration / 100) * risk_params.slope;
 
-        return _createLoan(VaultLib.loanCreation({
+        // changed: expirty => expiry, keyboard typo
+        return _createLoan(LoanCreation({
             nftCollateralContract: nftCollateralContract, 
             nftCollateralId: nftCollateralId, 
             loanPrincipal: Math.min(Math.min(_loanAmount, max_ltv * IPepeFiOracle(VAULT_DETAILS.CONTRACTS.ORACLE_CONTRACT).getPrice(nftCollateralContract, nftCollateralId)), risk_params.MAX_LOAN), 
             apr: risk_params.APR, 
-            loanExpirty: block.timestamp + (_duration * 86400)
+            loanExpiry: block.timestamp + (_duration * 86400)
         })); 
 
     }
 
-    function repayLoan(uint32 _loanId) external {
-        VaultLib.loanDetails storage curr_loan = _loans[_loanId];
+    // changed: defined return variable
+    function _createLoan(LoanCreation memory new_loan) internal returns (uint256 loanId){
+        // changed: set assertions as require statements, and added error messages
+        // changed: expirty => expiry, keyboard typo
+        // todo: create custom errors to save gas, and move to those
+        require(new_loan.loanExpiry < VAULT_DETAILS.CREATION_TIME + (VAULT_DETAILS.EXPIRY_IN * 2), "EXPIRY_TOO_HIGH"); //loan must settle in the next vault
+        require(new_loan.loanExpiry >= block.timestamp, "ALREADY_EXPIRED");
+        require(ASSET.balanceOf(address(this)) >= new_loan.loanPrincipal, "TREASURY_TOO_LOW");
 
-        if(curr_loan.expiry < block.timestamp) {revert();}
+        bool success = ASSET.transfer(msg.sender, new_loan.loanPrincipal);
+
+        require(success, "UNSUCCESSFUL_TRANSFER");
+
+        IERC721(new_loan.nftCollateralContract).transferFrom(msg.sender, address(this), new_loan.nftCollateralId); //Transfer the NFT to our wallet. 
+        
+        // changed: increment _nextId and save to memory, previous implementation repeatedly read from storage ($$$)
+        loanId = ++_nextId;
+
+        _loans[loanId] = LoanDetails({
+            timestamp: block.timestamp,
+            collateral: new_loan.nftCollateralContract,
+            assetId: new_loan.nftCollateralId,
+            expiry: new_loan.loanExpiry,
+            loanPrincipalAmount: new_loan.loanPrincipal, 
+            repaymentAmount: (((new_loan.loanExpiry-block.timestamp) * new_loan.apr * new_loan.loanPrincipal))/31536000000 + new_loan.loanPrincipal
+        });
+
+        ALL_LOANS.push(loanId);
+
+        _mint(msg.sender, loanId , 1, "");
+    }
+
+    function repayLoan(uint32 _loanId) external {
+        LoanDetails storage curr_loan = _loans[_loanId];
+
+        // changed: set assertion as require statement, and added error message
+        // todo: create custom errors to save gas, and move to those
+        require(curr_loan.expiry >= block.timestamp, "LOAN_EXPIRED");
         
         address transferTo = address(this);
 
@@ -144,57 +231,22 @@ contract Vault is ERC1155, ReentrancyGuard {
             IVaultManager(VAULT_DETAILS.CONTRACTS.VAULT_MANAGER).increaseAsset(curr_loan.repaymentAmount); 
         }
         
-        
-        bool success = ASSET.transferFrom(msg.sender, transferTo, curr_loan.repaymentAmount);        
-        require(success, "F");
+        bool success = ASSET.transferFrom(msg.sender, transferTo, curr_loan.repaymentAmount);  
 
+        // changed: completed error message
+        require(success, "UNSUCCESSFUL_TRANSFER");
 
-        IERC721(curr_loan.collateral).transferFrom(address(this), msg.sender,  curr_loan.assetId); //Transfer the NFT from our wallet to user
+        IERC721(curr_loan.collateral).transferFrom(address(this), msg.sender, curr_loan.assetId); //Transfer the NFT from our wallet to user
 
         delete _loans[_loanId];
 
-
         _burn(msg.sender, _loanId, 1);
-
-
     }
 
-    function isRollable() public view returns (bool) {
+    /*//////////////////////////////////////////////////////////////
+                                MISC
+    //////////////////////////////////////////////////////////////*/
 
-        for (uint i=0; i<ALL_LOANS.length; i++) {
-            if (_loans[ALL_LOANS[i]].timestamp != 0) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    //Removing and adding liquidity
-    function getWETHBalance() public view returns (uint256) {
-        uint256 loanBalance = 0;
-
-        //this loop thru active loans and liquidated assets. 2 birds 1 stone.
-        for (uint i=0; i<ALL_LOANS.length; i++) {
-            VaultLib.loanDetails memory details = _loans[ALL_LOANS[i]];
-            if (details.timestamp != 0){ //for repaid loans
-                 uint256 oraclePrice = IPepeFiOracle(VAULT_DETAILS.CONTRACTS.ORACLE_CONTRACT).getPrice(details.collateral, details.assetId);
-
-                if (oraclePrice * 900/1000 < details.repaymentAmount){
-                    loanBalance = loanBalance + (oraclePrice * 900/1000);
-                } else {
-                    loanBalance = loanBalance + details.loanPrincipalAmount;
-                }
-            }
-           
-        }
-
-        return IERC20(ASSET).balanceOf(address(this)) + loanBalance;
-    }
-
-    
-
-    //etc
     function uri(uint256 id) public view override returns (string memory){
         return "";
     }
@@ -204,7 +256,7 @@ contract Vault is ERC1155, ReentrancyGuard {
         _burn(msg.sender, _loanId, 1);
     }
 
-    function getVaultDetails() external view returns (VaultLib.VaultDetails memory){
+    function getVaultDetails() external view returns (VaultDetails memory){
         return VAULT_DETAILS;
     }
 
@@ -212,26 +264,35 @@ contract Vault is ERC1155, ReentrancyGuard {
         return ALL_LOANS;
     }
 
-    function updateWhitelistDetails(address _collection,  VaultLib.SUPPORTED_COLLECTIONS memory _detail) public onlyVaultManager {
+    /// todo: test gas vs Solady library for searching through array 
+    ///       https://github.com/Vectorized/solady/blob/main/src/utils/LibSort.sol#L290
+    function updateWhitelistDetails(address _collection, SUPPORTED_COLLECTIONS memory _detail) public onlyVaultManager {
         //make sure LTV is not increase 5% from initial while keeping global requirements or sth like that?
         
-        require(IVaultManager(VAULT_DETAILS.CONTRACTS.VAULT_MANAGER).validCollectionCheck(_detail) == true);
+        // changed: added error message
+        require(IVaultManager(VAULT_DETAILS.CONTRACTS.VAULT_MANAGER).validCollectionCheck(_detail) == true, "INVALID_DETAIL");
 
-        //loop thrue WHITELISTED_COLLECTIONS
-        for (uint i=0; i<WHITELISTED_COLLECTIONS.length; i++) {
-            if (WHITELISTED_COLLECTIONS[i] == _collection) {
+        // changed: saved whitelisted collections to memory (much cheaper) and made the loop more gas efficient
+        address[] memory _whitelistedCollections = WHITELISTED_COLLECTIONS;
+
+        // changed: storing array length in variables saves gas in loops
+        uint length = _whitelistedCollections.length;
+
+        //loop thru WHITELISTED_COLLECTIONS
+        for (uint i; i < length; ) {
+            if (_whitelistedCollections[i] == _collection) {
                 WHITELISTED_DETAILS[_collection] = _detail;
                 return;
             }
+
+            unchecked { ++i; }
         }
 
-        revert();
-
-        
+        // changed: added error message
+        revert("NOT_WHITELISTED");
     }
 
-
-    //a function for testing only
+    /// temp: a function for testing only
     function expireVault() external {
         require(msg.sender == VAULT_DETAILS.VAULT_CREATOR);
         VAULT_DETAILS.EXPIRY_IN = 0;
