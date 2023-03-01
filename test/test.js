@@ -2,7 +2,7 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const axios = require('axios')
 
-
+const { mine } = require("@nomicfoundation/hardhat-network-helpers");
 const {deployContracts, getGenericVaultParams} =  require("../scripts/deploy.js")
 let owner;
 let WETH_CONTRACT;
@@ -66,7 +66,7 @@ describe('Contract tests', () => {
         }
 
         expect(array[0]['type']).to.equal(2);
-
+        expect(array[1]['type']).to.equal(1);
         
     })
 
@@ -78,6 +78,11 @@ describe('Contract tests', () => {
         expect(await vault.balanceOf(owner.address, 0)).to.equal(amt);
         expect(parseInt(await weth.balanceOf(vault.address))).to.greaterThanOrEqual(parseInt(amt));
     })
+
+    // it("Delayed Liquidity", async function () {
+    //     await mine(10000)
+    //     await vm.addLiquidity(10, vault.address);
+    // })
 
     it("Take and Repay ERC721 Loan", async function () {
         await weth.approve(vault.address, ethers.constants.MaxUint256);
@@ -93,27 +98,31 @@ describe('Contract tests', () => {
         let curr_loan = all_loans[all_loans.length-1]
         let loanDetails = await vault._loans(curr_loan)
 
-        expect((loanDetails.repaymentAmount/10**16).toFixed(3)).to.be.oneOf(['1.037']);
-        // expect(loanDetails.expiry).to.equal(repaymentDate);
+        expect((loanDetails.repaymentAmount/10**16).toFixed(3)).to.be.oneOf(['1.021']);
         expect(loanDetails.loanPrincipalAmount).to.equal('10000000000000000');
 
         await weth.approve(vault.address, ethers.constants.MaxUint256);
+
+        expect(await vault.getWETHBalance()/10**18).to.be.oneOf([1]);
+
         await vault.repayLoan(curr_loan)
 
     })
 
     it("Take and Repay Financial Loan", async function () {
         await fnft.approve(vault.address, 1)
-
         await vault.takeERC721Loan(fnft.address, 1, String(10**16),   30);
         let all_loans = await vault.getAllLoans()
         let curr_loan = all_loans[all_loans.length-1]
         let loanDetails = await vault._loans(curr_loan)
 
-        expect((loanDetails.repaymentAmount/10**16).toFixed(3)).to.be.oneOf(['1.037']);
+        expect((loanDetails.repaymentAmount/10**16).toFixed(3)).to.be.oneOf(['1.021']);
         expect(loanDetails.loanPrincipalAmount).to.equal('10000000000000000');
 
+        expect((await vault.getWETHBalance()/10**18).toFixed(3)).to.be.oneOf(['1.000']);
+
         await vault.repayLoan(curr_loan)
+
     })
 
     it("Rollover", async function () {
@@ -176,6 +185,8 @@ describe('Contract tests', () => {
         expect(parseInt(await new_vault.balanceOf(owner.address, 0))).to.greaterThan(0)
 
     })
+
+
 
 
 

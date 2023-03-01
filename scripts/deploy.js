@@ -6,30 +6,6 @@ const { promises: { readdir } } = require('fs')
 const fs = require("fs");
 const { ethers } = require("hardhat");
 
-let acceptedCollections;
-
-if (process.env.HARDHAT_NETWORK == 'goerli')
-{
-
-    acceptedCollections = [
-        { name: 'Multifaucet NFT', address: '0xf5de760f2e916647fd766B4AD9E85ff943cE3A2b', imgSrc:'https://img.seadn.io/files/b4d419a67bc7dc52000e6d1336b24c46.png?fit=max&w=600', slug: 'multifaucet-nft-q55yxxitoz'},
-    ]
-}
-else
-{
-    acceptedCollections = [
-        { name: 'Bored Ape Yacht Club', address: '0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d',imgSrc:'/static/images/vaults/boredapeyachtclub.png', slug: 'boredapeyachtclub', },
-        { name: 'Doodle', address: '0x8a90cab2b38dba80c64b7734e58ee1db38b8992e',imgSrc:'/static/images/vaults/doodles-official.png', slug: 'doodles-official'},
-        { name: 'Moonbirds', address: '0x23581767a106ae21c074b2276d25e5c3e136a68b',imgSrc:'/static/images/vaults/proof-moonbirds.png', slug: 'proof-moonbirds'},
-        { name: 'CloneX', address: '0x49cf6f5d44e70224e2e23fdcdd2c053f30ada28b',imgSrc:'/static/images/vaults/clonex.png', slug: 'clonex'},
-        { name: 'CryptoDickbutts', address: '0x42069abfe407c60cf4ae4112bedead391dba1cdb', imgSrc: '/static/images/vaults/cryptodickbutts-s3.png', slug: 'cryptodickbutts-s3'},
-        { name: 'Wrapped Cryptopunks', address: '0xb7F7F6C52F2e2fdb1963Eab30438024864c313F6', imgSrc: '/static/images/vaults/wrapped-cryptopunks.png', slug: 'wrapped-cryptopunks'}
-    ]
-}
-
-
-
-
 let abis = {}
 
 abis['ERC20_ABI'] = '[{"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_value","type":"uint256"}],"name":"approve","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"balance","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"},{"name":"_spender","type":"address"}],"name":"allowance","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"payable":true,"stateMutability":"payable","type":"fallback"},{"anonymous":false,"inputs":[{"indexed":true,"name":"owner","type":"address"},{"indexed":true,"name":"spender","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Transfer","type":"event"}]'
@@ -56,11 +32,11 @@ function getGenericVaultParams(mynft, fnft, uw, is_platform) {
     let ALLOWED_MAX_MULTIPLIER = [10000, 10000, 10000, 10000, 10000]
 
     if (is_platform == false){
-        MAX_LTV = 500
-        MAX_DURATION = 90
+        MAX_LTV = 600
+        MAX_DURATION = 91
         slope = 1
-        APR = 450
-        MAX_LOAN = '1000000000000000000'
+        APR = 250
+        MAX_LOAN = '30000000000000000000'
         ALLOWED_MAX_MULTIPLIER = [800, 350, 350, 300, 125]
     }
 
@@ -165,7 +141,6 @@ async function deployContracts(testnet=true, receivers=[]){
     addresses['Uni_Wrapper'] = uw.address
 
     const VaultManager = await ethers.getContractFactory("VaultManager");
-    console.log({ASSET: WETH_CONTRACT, AUCTION_CONTRACT: pe.address, BASE_VAULT: vb.address, ORACLE_CONTRACT: or.address, PEPEFI_ADMIN: signer.address, VAULT_MANAGER: '0x0000000000000000000000000000000000000000'})
     let vm = await VaultManager.deploy({ASSET: WETH_CONTRACT, AUCTION_CONTRACT: pe.address, BASE_VAULT: vb.address, ORACLE_CONTRACT: or.address, PEPEFI_ADMIN: signer.address, VAULT_MANAGER: '0x0000000000000000000000000000000000000000'} );
     await vm.deployed();  
     console.log("Vault Manager Contract Deployed at " + vm.address);

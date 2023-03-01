@@ -247,8 +247,7 @@ contract Vault is ERC1155, ReentrancyGuard {
                                 MISC
     //////////////////////////////////////////////////////////////*/
 
-    /// changed: made function pure and removed param variable to remove error message
-    function uri(uint256) public pure override returns (string memory){
+    function uri(uint256 id) public view override returns (string memory){
         return "";
     }
 

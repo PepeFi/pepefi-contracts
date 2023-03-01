@@ -31,14 +31,13 @@ module.exports = {
     hardhat: {
       chainId: 1337,
       forking: {
-        url: `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_API}`,
+        url: `https://eth-goerli.alchemyapi.io/v2/${process.env.ALCHEMY_API}`,
         accounts: [process.env.ETH_KEY]
       }
     },
     goerli: {
       url: `https://eth-goerli.alchemyapi.io/v2/${process.env.ALCHEMY_API}`,
-      accounts: [process.env.ETH_KEY],
-      gasPrice: 50000000000
+      accounts: [process.env.ETH_KEY]
     },
   },
   gasReporter: {

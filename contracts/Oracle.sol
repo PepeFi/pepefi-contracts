@@ -28,7 +28,6 @@ contract Oracle {
     }
 
     function setVaultManager(address _vaultManager) public onlyAdmin {
-        console.log(_vaultManager);
         vaultManager = _vaultManager;
     }
 
